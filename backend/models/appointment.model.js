@@ -35,6 +35,15 @@ const appointmentSchema = new Schema({
 
 }, {timestamps: true});
 
+//avoid double booking
+appointmentSchema.index(
+    {
+        appointmentDate: 1,
+        timeSlot: 1
+    },
+    {unique: true}
+)
+
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 
 export{
