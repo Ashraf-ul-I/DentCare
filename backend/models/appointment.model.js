@@ -14,8 +14,26 @@ const appointmentSchema = new Schema({
         type: Number,
         required: [true, "Phone number is required"],
     },
+    appointmentDate: {
+        type: Date,
+        required: [true, "Please select an appointment date"],
+        validate: {
+            validator: function(v){
+                return v >= new Date().setHours(0, 0, 0, 0);
+            },
+            message: "Appointment date cannot be in the past, select future date"
+        }
+    },
+    timeSlot: {
+        type: String,
+        required: [true, "Please select a time slot"],
+        enum: {
+            values: ["9:00 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM", "4:00 PM"], // Add your time slots
+            message: "Please select a valid time slot"
+        },
+    }
 
-})
+}, {timestamps: true});
 
 const Appointment = mongoose.model("Appointment", appointmentSchema);
 
