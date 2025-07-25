@@ -1,6 +1,6 @@
 import React from "react";
-import AppointmentForm from "../components/AppointmentForm";
-import DoctorCard from "../components/DoctorCard";
+import AppointmentForm from "../Components/AppointmentForm";
+import DoctorCard from "../Components/DoctorCard";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
 
