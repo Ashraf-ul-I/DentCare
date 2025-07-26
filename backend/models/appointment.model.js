@@ -28,7 +28,7 @@ const appointmentSchema = new Schema({
         type: String,
         required: [true, "Please select a time slot"],
         enum: {
-            values: ["9:00 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM", "4:00 PM"], // Add your time slots
+            values: ["9:00 AM", "10:00 AM", "11:00 AM", "2:00 PM", "3:00 PM", "4:00 PM"], 
             message: "Please select a valid time slot"
         },
     }
