@@ -58,17 +58,6 @@ export default function AppointmentForm({
     } catch (error) {
       alert(`Booking failed\n ${error.message}`);
     }
-
-    // if (selectedSlot && formData.name && formData.email && formData.phone && selectedDate){
-    //   const bookingKey = `${selectedDate.toDateString()}-${selectedSlot}`;
-    //   setBookedSlots((prev) => new Set([...prev, bookingKey]));
-    //   setSelectedSlot("");
-    //   setFormData({ name: "", email: "", phone: "", service: "" });
-    //   alert(`Appointment booked successfully for ${selectedDate.toLocaleDateString()} at ${selectedSlot}!`);
-    // }
-    // else {
-    //   alert("Please fill all fields, select a date, and choose a time slot.");
-    // }
   };
 
   const navigateMonth = (direction) => {
