@@ -5,6 +5,7 @@ import {ApiError} from "../utils/ApiError.js"
 
 const bookAppointment = asyncHandler(async (req, res) => {
     const {fullname, email, phone, appointmentDate, timeSlot} = req.body;
+    console.log(req.body);
 
     if(!fullname || !phone || !appointmentDate || !timeSlot ){
         throw new ApiError(400, "Please fill up all the information");
@@ -32,6 +33,9 @@ const bookAppointment = asyncHandler(async (req, res) => {
         new ApiResponse(201, newAppointment, "Appointment created successfully")
     )
 })
+
+// Get booked appointments on a current date
+// Get all appointments
 
 export{
     bookAppointment,
