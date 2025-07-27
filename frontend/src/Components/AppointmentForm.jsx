@@ -27,7 +27,6 @@ export default function AppointmentForm({
       !selectedSlot ||
       !selectedDate ||
       !formData.name ||
-      !formData.email ||
       !formData.phone
     ) {
       alert("Please fill all the fields, select a date and time slot");
@@ -368,7 +367,6 @@ export default function AppointmentForm({
                     !selectedDate ||
                     !selectedSlot ||
                     !formData.name ||
-                    !formData.email ||
                     !formData.phone
                   }
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
