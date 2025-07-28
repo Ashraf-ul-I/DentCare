@@ -11,7 +11,7 @@ export const bookAppointment = async (data) => {
 
 export const fetchBookedSlots = async (selectedDate) => {
   if (!selectedDate) return [];
-  const res = await axios.get(
+  const res = await axiosInstance.get(
     `${BASE_URL}/appointment/booked?date=${selectedDate.toISOString()}`
   );
   console.log("api response", res.data.data);
