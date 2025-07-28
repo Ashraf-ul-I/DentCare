@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import MDEditor from "@uiw/react-md-editor";
 import axios from "axios";
+import { useCreateBlog } from "../hooks/useCreateBlog";
+import { useUpdateBlog } from "../hooks/useUpdateBlogs";
 
 export default function AdminCreateBlog() {
   const location = useLocation();
@@ -52,7 +54,10 @@ export default function AdminCreateBlog() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const createMutation = useCreateBlog();
+  const updateMutation = useUpdateBlog();
+
+  const handleSubmit = (e) => {
     e.preventDefault();
     setUploadProgress(0);
     setMessage("");
@@ -63,62 +68,41 @@ export default function AdminCreateBlog() {
     formData.append("category", category);
     if (image) formData.append("image", image);
 
-    const token = localStorage.getItem("token");
+    const onUpload = {
+      onUploadProgress: (event) => {
+        const percent = Math.round((event.loaded * 100) / event.total);
+        setUploadProgress(percent);
+      },
+    };
 
-    try {
-      let response;
-
-      if (isEditing) {
-        // PUT request for update
-        response = await axios.put(
-          `http://localhost:3000/api/v1/blog/update/${blogToEdit._id}`,
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-            onUploadProgress: (progressEvent) => {
-              const percent = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-              setUploadProgress(percent);
-            },
-          }
-        );
-      } else {
-        // POST request for create
-        response = await axios.post(
-          "http://localhost:3000/api/v1/blog/create",
-          formData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-            onUploadProgress: (progressEvent) => {
-              const percent = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
-              );
-              setUploadProgress(percent);
-            },
-          }
-        );
-      }
-
-      setMessage(response.data.message || "Blog submitted successfully");
-      setUploadProgress(0);
-      if (!isEditing) {
-        // Only reset if it's a new blog
-        setTitle("");
-        setContent("**Start writing your blog...**");
-        setCategory("");
-        setImage(null);
-        setPreview(null);
-      }
-    } catch (err) {
-      setMessage("Failed to submit blog");
-      console.error(err);
+    if (isEditing) {
+      updateMutation.mutate(
+        { id: blogToEdit._id, formData },
+        {
+          ...onUpload,
+          onSuccess: (data) => {
+            setMessage(data.message || "Blog updated successfully");
+          },
+          onError: () => {
+            setMessage("Failed to update blog");
+          },
+        }
+      );
+    } else {
+      createMutation.mutate(formData, {
+        ...onUpload,
+        onSuccess: (data) => {
+          setMessage(data.message || "Blog created successfully");
+          setTitle("");
+          setContent("**Start writing your blog...**");
+          setCategory("");
+          setImage(null);
+          setPreview(null);
+        },
+        onError: () => {
+          setMessage("Failed to create blog");
+        },
+      });
     }
   };
 

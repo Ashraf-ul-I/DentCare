@@ -3,10 +3,12 @@ import { useBlogs } from "../hooks/useBloges";
 import { motion, AnimatePresence } from "framer-motion";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import { useDelete } from "../hooks/useDelete";
 
 const ShowAdminBlogs = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const { data: blogs = [], isLoading, isError } = useBlogs();
+  const deleteMutation = useDelete();
   const navigate = useNavigate();
   const categories = ["all", ...new Set(blogs.map((p) => p.category))];
 
@@ -66,7 +68,14 @@ const ShowAdminBlogs = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition">
+                <button
+                  onClick={() => {
+                    if (confirm("Are you sure you want to delete this blog?")) {
+                      deleteMutation.mutate(item._id);
+                    }
+                  }}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                >
                   Delete
                 </button>
                 <button

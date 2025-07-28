@@ -2,6 +2,7 @@
 import Blog from "../models/blog.models.js";
 import { cloudinary } from "../utils/cloudinary.js";
 import { sanitizeHTML } from "../utils/sanitizeHtml.js";
+import mongoose from "mongoose";
 
 export const createBlog = async (req, res) => {
   try {
@@ -51,17 +52,50 @@ export const createBlog = async (req, res) => {
 export const updateBlog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content, category } = req.body;
-    const sanitizedContent = sanitizeHTML(content);
 
-    const updatedBlog = await Blog.findByIdAndUpdate(
-      id,
-      { title, content: sanitizedContent, category },
-      { new: true }
-    );
-    res.json({ message: "Blog updated", blog: updatedBlog });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating blog" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid blog ID" });
+    }
+
+    const { title, content, category } = req.body;
+
+    // Sanitize content to prevent XSS
+    const sanitizedContent = content ? sanitizeHTML(content) : undefined;
+
+    const existingBlog = await Blog.findById(id);
+    if (!existingBlog) {
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    existingBlog.title = title || existingBlog.title;
+    existingBlog.content = sanitizedContent || existingBlog.content;
+    existingBlog.category = category || existingBlog.category;
+
+    // If new image uploaded, upload to Cloudinary
+    if (req.file) {
+      const imageUrl = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: "image" },
+          (error, result) => {
+            if (error || !result) {
+              return reject(new Error("Cloudinary upload failed"));
+            }
+            resolve(result.secure_url);
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+      existingBlog.image = imageUrl;
+    }
+
+    await existingBlog.save();
+
+    res
+      .status(200)
+      .json({ message: "Blog updated successfully", blog: existingBlog });
+  } catch (error) {
+    console.error("Update blog error:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 

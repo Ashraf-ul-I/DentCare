@@ -7,7 +7,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         // If refresh also fails, logout user
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("token");
         window.location.href = "/login";
         return Promise.reject(refreshError);
       }

@@ -18,8 +18,16 @@ blogRoute.post(
   upload.single("image"),
   createBlog
 );
-blogRoute.put("/:id", authenticate, adminOnly, updateBlog);
-blogRoute.delete("/:id", authenticate, adminOnly, deleteBlog);
+blogRoute.put(
+  "/edit/:id",
+
+  authenticate,
+  adminOnly,
+  upload.single("image"),
+  updateBlog
+);
+
+blogRoute.delete("/delete/:id", authenticate, adminOnly, deleteBlog);
 
 blogRoute.get("/all-blogs", getAllBlogs);
 blogRoute.get("/:id", getBlogById);
