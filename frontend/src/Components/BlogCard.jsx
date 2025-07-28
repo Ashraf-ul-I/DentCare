@@ -14,12 +14,12 @@ import {
 import { useState } from "react";
 
 export default function BlogCard({ post }) {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   return (
     <div
       className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden cursor-pointer flex flex-col"
-      onClick={() => navigate(`/blogs/${post.id}`)} // Navigate to the detail page
+      onClick={() => navigate(`/blogs/${post._id}`)} // Navigate to the detail page
     >
       {/* Blog post image */}
       <img
@@ -40,7 +40,7 @@ export default function BlogCard({ post }) {
         </h2>
         {/* Blog post excerpt */}
         <p className="text-gray-600 text-base flex-grow">
-          {post.excerpt.split(". ")[0]}.{" "}
+          {post.content.split(". ")[0]}.{" "}
           {/* Display only the first sentence for excerpt */}
         </p>
         {/* Blog post date */}
