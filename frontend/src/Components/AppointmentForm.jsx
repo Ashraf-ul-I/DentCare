@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from "react";
 import { Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { appointmentService } from "../services/appointmentService";
-
+import { useBookAppointment } from "../hooks/useBookMutation.js";
+import { useBookedSlots } from "../hooks/useBookedSlots.js";
+import { useEffect } from "react";
 export default function AppointmentForm({
   formData,
   setFormData,
@@ -16,47 +18,54 @@ export default function AppointmentForm({
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  const { mutate, isPending } = useBookAppointment();
+  const { data: bookedData } = useBookedSlots(selectedDate);
+
+  const bookedSlotsArray = bookedData || [];
+
+  function dd(s) {
+    return bookedSlotsArray.some((slot) => slot === s);
+  }
+
   const handleSlotSelect = (slot) => {
-    if (!bookedSlots.has(`${selectedDate.toDateString()}-${slot}`)) {
+    const takenDate = dd(slot);
+
+    if (!takenDate) {
       setSelectedSlot(slot);
     }
   };
 
-  const handleBooking = async() => {
-    if (
-      !selectedSlot ||
-      !selectedDate ||
-      !formData.name ||
-      !formData.phone
-    ) {
+  const handleBooking = () => {
+    if (!selectedSlot || !selectedDate || !formData.name || !formData.phone) {
       alert("Please fill all the fields, select a date and time slot");
       return;
     }
 
-    try {
-      const appointmentData = {
-        fullname: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        appointmentDate: selectedDate.toISOString(),
-        timeSlot: selectedSlot,
-      }
+    const appointmentData = {
+      fullname: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      appointmentDate: selectedDate.toISOString(),
+      timeSlot: selectedSlot,
+    };
 
-      const result = await appointmentService.bookAppointment(appointmentData);
+    mutate(appointmentData, {
+      onSuccess: (result) => {
+        if (result.success) {
+          const bookingKey = `${selectedDate.toDateString()}-${selectedSlot}`;
+          setBookedSlots((prev) => new Set([...prev, bookingKey]));
 
-      if(result.success){
-        const bookingKey = `${selectedDate.toDateString()}-${selectedSlot}`;
-        setBookedSlots((prev) => new Set([...prev, bookingKey]));
+          setSelectedSlot("");
+          setFormData({ name: "", email: "", phone: "", service: "" });
 
-        setSelectedSlot("");
-        setFormData({ name: "", email: "", phone: "", service: "" });
-
-        alert(`Appointment booked successfully! ID: ${result.data._id}`);
-      }
-      
-    } catch (error) {
-      alert(`Booking failed\n ${error.message}`);
-    }
+          alert(`Appointment booked successfully! ID: ${result.data._id}`);
+        }
+      },
+      onError: (error) => {
+        const message = error?.response?.data?.message || error.message;
+        alert(`Booking failed\n${message}`);
+      },
+    });
   };
 
   const navigateMonth = (direction) => {
@@ -109,16 +118,21 @@ export default function AppointmentForm({
       const date = new Date(year, month + 1, day);
       days.push({ date, isCurrentMonth: false, isPast: false });
     }
-
+    console.log("days", days);
     return days;
   }, [currentMonth]);
+
+  const newbookedSlots = new Set(
+    bookedSlotsArray.map((slot) => `${selectedDate.toDateString()}-${slot}`)
+  );
 
   const getAvailableSlots = () => {
     if (!selectedDate) return [];
 
-    return timeSlots.filter((slot) => {
+    return timeSlots.map((slot) => {
       const bookingKey = `${selectedDate.toDateString()}-${slot}`;
-      return !bookedSlots.has(bookingKey);
+      const isBooked = newbookedSlots.has(bookingKey);
+      return { slot, isBooked };
     });
   };
 
@@ -205,9 +219,11 @@ export default function AppointmentForm({
               <div className="grid grid-cols-7 gap-2 mb-8">
                 {generateCalendarDays.map((dayObj, index) => {
                   const { date, isCurrentMonth, isPast } = dayObj;
+
                   const isSelected =
                     selectedDate &&
                     selectedDate.toDateString() === date.toDateString();
+
                   const isToday =
                     date.toDateString() === new Date().toDateString();
 
@@ -252,18 +268,20 @@ export default function AppointmentForm({
 
                   {getAvailableSlots().length > 0 ? (
                     <div className="grid grid-cols-3 gap-2 mb-4">
-                      {getAvailableSlots().map((slot) => (
+                      {getAvailableSlots().map(({ slot, isBooked }) => (
                         <button
                           key={slot}
                           onClick={() => handleSlotSelect(slot)}
-                          className={`
-                            p-2 text-sm rounded-lg transition-colors
-                            ${
-                              selectedSlot === slot
-                                ? "bg-blue-600 text-white shadow-md"
-                                : "bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600"
-                            }
-                          `}
+                          disabled={isBooked}
+                          className={`p-2 text-sm rounded-lg transition-colors
+                             ${
+                               isBooked
+                                 ? "bg-red-500 text-white cursor-not-allowed opacity-60"
+                                 : selectedSlot === slot
+                                 ? "bg-blue-600 text-white shadow-md"
+                                 : "bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-600 cursor-pointer"
+                             }
+                           `}
                         >
                           {slot}
                         </button>
@@ -364,6 +382,7 @@ export default function AppointmentForm({
                   type="button"
                   onClick={handleBooking}
                   disabled={
+                    isPending ||
                     !selectedDate ||
                     !selectedSlot ||
                     !formData.name ||
@@ -371,7 +390,7 @@ export default function AppointmentForm({
                   }
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
-                  Confirm Appointment
+                  {isPending ? "Booking..." : "Confirm Appointment"}
                 </button>
               </div>
             </div>

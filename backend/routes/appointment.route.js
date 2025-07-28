@@ -1,14 +1,12 @@
 import { Router } from "express";
-import { bookAppointment } from "../controllers/appointment.controller.js";
+import {
+  bookAppointment,
+  getBookedAppointments,
+} from "../controllers/appointment.controller.js";
 
 const appointmentRouter = Router();
 
-
 appointmentRouter.route("/appointment").post(bookAppointment);
+appointmentRouter.get("/appointment/booked", getBookedAppointments);
 
-
-export{
-    appointmentRouter,
-}
-
-
+export { appointmentRouter };
