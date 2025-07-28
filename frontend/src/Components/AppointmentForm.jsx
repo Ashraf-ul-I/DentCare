@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Calendar, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { appointmentService } from "../services/appointmentService";
-
+import { useBookAppointment } from "../hooks/useBookMutation.js";
 export default function AppointmentForm({
   formData,
   setFormData,
@@ -16,47 +16,45 @@ export default function AppointmentForm({
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
+  const { mutate, isPending } = useBookAppointment();
+
   const handleSlotSelect = (slot) => {
     if (!bookedSlots.has(`${selectedDate.toDateString()}-${slot}`)) {
       setSelectedSlot(slot);
     }
   };
 
-  const handleBooking = async() => {
-    if (
-      !selectedSlot ||
-      !selectedDate ||
-      !formData.name ||
-      !formData.phone
-    ) {
+  const handleBooking = () => {
+    if (!selectedSlot || !selectedDate || !formData.name || !formData.phone) {
       alert("Please fill all the fields, select a date and time slot");
       return;
     }
 
-    try {
-      const appointmentData = {
-        fullname: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        appointmentDate: selectedDate.toISOString(),
-        timeSlot: selectedSlot,
-      }
+    const appointmentData = {
+      fullname: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      appointmentDate: selectedDate.toISOString(),
+      timeSlot: selectedSlot,
+    };
 
-      const result = await appointmentService.bookAppointment(appointmentData);
+    mutate(appointmentData, {
+      onSuccess: (result) => {
+        if (result.success) {
+          const bookingKey = `${selectedDate.toDateString()}-${selectedSlot}`;
+          setBookedSlots((prev) => new Set([...prev, bookingKey]));
 
-      if(result.success){
-        const bookingKey = `${selectedDate.toDateString()}-${selectedSlot}`;
-        setBookedSlots((prev) => new Set([...prev, bookingKey]));
+          setSelectedSlot("");
+          setFormData({ name: "", email: "", phone: "", service: "" });
 
-        setSelectedSlot("");
-        setFormData({ name: "", email: "", phone: "", service: "" });
-
-        alert(`Appointment booked successfully! ID: ${result.data._id}`);
-      }
-      
-    } catch (error) {
-      alert(`Booking failed\n ${error.message}`);
-    }
+          alert(`Appointment booked successfully! ID: ${result.data._id}`);
+        }
+      },
+      onError: (error) => {
+        const message = error?.response?.data?.message || error.message;
+        alert(`Booking failed\n${message}`);
+      },
+    });
   };
 
   const navigateMonth = (direction) => {
@@ -364,6 +362,7 @@ export default function AppointmentForm({
                   type="button"
                   onClick={handleBooking}
                   disabled={
+                    isPending ||
                     !selectedDate ||
                     !selectedSlot ||
                     !formData.name ||
@@ -371,7 +370,7 @@ export default function AppointmentForm({
                   }
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
-                  Confirm Appointment
+                  {isPending ? "Booking..." : "Confirm Appointment"}
                 </button>
               </div>
             </div>
