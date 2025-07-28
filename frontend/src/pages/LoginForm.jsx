@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
+import { useForgotPassMutation } from "../hooks/useForgotPass";
+import { useLoginMutation } from "../hooks/useLoginMutation";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -10,31 +12,41 @@ export default function LoginForm() {
   const [countdown, setCountdown] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const loginMutation = useLoginMutation();
+  const forgotMutation = useForgotPassMutation();
+
+  const handleLogin = (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
-      setMessage("Login successful!");
-    } catch (err) {
-      setMessage("Login failed");
-    }
+    setMessage("");
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: (res) => {
+          localStorage.setItem("token", res.data.accessToken);
+          setMessage("Login successful!");
+          navigate("/dashboard");
+        },
+        onError: () => {
+          setMessage("Login failed");
+        },
+      }
+    );
   };
 
-  const handleForgot = async () => {
-    try {
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/auth/forgot-password",
-        { email }
-      );
-      setMessage(res.data.message || "OTP sent to your email");
-      setCountdown(5);
-    } catch (err) {
-      setMessage("Failed to send reset link");
-    }
+  const handleForgot = () => {
+    setMessage("");
+    forgotMutation.mutate(
+      { email },
+      {
+        onSuccess: (res) => {
+          setMessage(res.data.message || "OTP sent to your email");
+          setCountdown(5);
+        },
+        onError: () => {
+          setMessage("Failed to send reset link");
+        },
+      }
+    );
   };
 
   useEffect(() => {
@@ -43,11 +55,7 @@ export default function LoginForm() {
       navigate("/otp-reset");
       return;
     }
-
-    const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-
+    const timer = setTimeout(() => setCountdown((prev) => prev - 1), 1000);
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
 
@@ -68,6 +76,7 @@ export default function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loginMutation.isLoading}
             />
           </div>
 
@@ -80,14 +89,16 @@ export default function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={loginMutation.isLoading}
             />
           </div>
 
           <button
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-2 rounded-lg font-semibold"
+            disabled={loginMutation.isLoading}
           >
-            Login
+            {loginMutation.isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -95,6 +106,7 @@ export default function LoginForm() {
           <button
             onClick={() => setShowForgot(true)}
             className="text-sm text-blue-600 hover:underline"
+            disabled={forgotMutation.isLoading}
           >
             Forgot Password?
           </button>
@@ -105,15 +117,23 @@ export default function LoginForm() {
             <button
               onClick={handleForgot}
               className="w-full bg-red-500 hover:bg-red-600 transition text-white py-2 rounded-lg font-semibold"
+              disabled={forgotMutation.isLoading}
             >
-              Send Reset Otp
+              {forgotMutation.isLoading ? "Sending OTP..." : "Send Reset OTP"}
             </button>
           </div>
         )}
 
         {message && (
-          <p className="text-center text-green-600 text-sm mt-4">{message}</p>
+          <p
+            className={`text-center text-sm mt-4 ${
+              message.includes("failed") ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {message}
+          </p>
         )}
+
         {countdown !== null && (
           <p className="text-center text-gray-500 text-sm mt-2">
             Redirecting in {countdown} second{countdown !== 1 ? "s" : ""}...

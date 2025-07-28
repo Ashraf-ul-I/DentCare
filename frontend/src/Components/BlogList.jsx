@@ -1,74 +1,35 @@
 import { useState } from "react";
+import { Filter as FilterIcon } from "lucide-react";
+import { useBlogs } from "../hooks/useBloges";
 import BlogCard from "./BlogCard";
-import {
-  Calendar,
-  Clock,
-  Mail,
-  Phone,
-  MapPin,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Filter as FilterIcon,
-  ArrowRight,
-} from "lucide-react";
-const blogPosts = [
-  {
-    id: 1,
-    title: "5 Tips for Better Oral Hygiene",
-    category: "hygiene",
-    excerpt: `Maintaining good oral hygiene is essential...`,
-    date: "March 15, 2024",
-    image:
-      "https://images.pexels.com/photos/3845457/pexels-photo-3845457.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 2,
-    title: "Understanding Root Canal Treatment",
-    category: "rootcanal",
-    excerpt: `Root canal treatment is one of the most common dental procedures...`,
-    date: "March 10, 2024",
-    image:
-      "https://images.pexels.com/photos/3779709/pexels-photo-3779709.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 3,
-    title: "Benefits of Regular Dental Checkups",
-    category: "regular",
-    excerpt: `Many people underestimate the importance of regular dental checkups...`,
-    date: "March 5, 2024",
-    image:
-      "https://images.pexels.com/photos/3845810/pexels-photo-3845810.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 4,
-    title: "The Link Between Oral Health and Heart Disease",
-    category: "oral",
-    excerpt: `Recent studies have shown a strong link between oral health and cardiovascular health...`,
-    date: "February 28, 2024",
-    image:
-      "https://images.pexels.com/photos/5355694/pexels-photo-5355694.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-  {
-    id: 5,
-    title: "How Diet Affects Your Teeth and Gums",
-    category: "regular",
-    excerpt: `Your diet plays a crucial role in maintaining healthy teeth and gums...`,
-    date: "February 20, 2024",
-    image:
-      "https://images.pexels.com/photos/4270097/pexels-photo-4270097.jpeg?auto=compress&cs=tinysrgb&w=400",
-  },
-];
 
 export const BlogList = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const { data: blogs = [], isLoading, isError } = useBlogs();
+  // Prepare categories safely
+  const categories = ["all", ...new Set(blogs.map((p) => p.category))];
 
-  const categories = ["all", ...new Set(blogPosts.map((p) => p.category))];
-
+  // Filter posts based on selected category
   const filteredPosts =
     selectedCategory === "all"
-      ? blogPosts
-      : blogPosts.filter((post) => post.category === selectedCategory);
+      ? blogs
+      : blogs.filter((post) => post.category === selectedCategory);
+  console.log("filterd", filteredPosts);
+  if (isLoading) {
+    return (
+      <section className="py-20 bg-gray-50 text-center">
+        <p className="text-lg text-gray-600">Loading blogs...</p>
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section className="py-20 bg-gray-50 text-center">
+        <p className="text-lg text-red-600">Failed to load blogs.</p>
+      </section>
+    );
+  }
 
   return (
     <section id="blogs" className="py-20 bg-gray-50">
@@ -81,7 +42,7 @@ export const BlogList = () => {
             Stay informed with our latest dental health insights
           </p>
         </div>
-        {/* Grid layout for blog cards */}
+        {/* Filter dropdown */}
         <div className="flex justify-end py-4">
           <div className="inline-flex items-center space-x-2">
             <FilterIcon className="w-5 h-5 text-blue-600" />
@@ -92,17 +53,24 @@ export const BlogList = () => {
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
-                  {cat === "all" ? "All Categories" : cat}
+                  {cat === "all"
+                    ? "All Categories"
+                    : cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </option>
               ))}
             </select>
           </div>
         </div>
+
+        {/* Blog Cards grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* Map through blogPosts data to render each BlogCard */}
-          {filteredPosts.map((post) => (
-            <BlogCard key={post.id} post={post} />
-          ))}
+          {filteredPosts.length > 0 ? (
+            filteredPosts.map((post) => <BlogCard key={post._id} post={post} />)
+          ) : (
+            <p className="text-center col-span-full text-gray-500">
+              No blogs found in this category.
+            </p>
+          )}
         </div>
       </div>
     </section>

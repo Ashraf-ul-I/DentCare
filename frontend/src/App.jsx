@@ -24,6 +24,11 @@ import ResetPassword from "./Components/ResetPassword";
 import { useLocation } from "react-router-dom";
 
 import { Routes, Route, Outlet } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import DoctorCard from "./Components/DoctorCard";
+import AdminCreateBlog from "./Components/AdminCreateBlog";
+import ShowAdminBlogs from "./Components/ShowAdminBlogs";
+import ProtectedRoute from "./utils/ProtectedRoute"; // import it
 
 function MainLayout() {
   return (
@@ -36,7 +41,7 @@ function MainLayout() {
 }
 
 function AuthLayout() {
-  return <Outlet />; // Just render child pages, no Navbar/Footer
+  return <Outlet />;
 }
 
 function App() {
@@ -52,6 +57,15 @@ function App() {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/otp-reset" element={<ResetPassword />} />
+
+        {/* Protect dashboard routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route path="create-blog" element={<AdminCreateBlog />} />
+            <Route path="home-image" element={<DoctorCard />} />
+            <Route path="show-blogs" element={<ShowAdminBlogs />} />
+          </Route>
+        </Route>
       </Route>
     </Routes>
   );
