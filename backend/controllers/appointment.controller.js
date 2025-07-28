@@ -40,7 +40,26 @@ const bookAppointment = asyncHandler(async (req, res) => {
 });
 
 // Get booked appointments on a current date
+const getBookedAppointments = asyncHandler(async (req, res) => {
+  const { date } = req.query;
 
+  if (!date) {
+    throw new ApiError(400, "Date is required");
+  }
+  const selectedDate = new Date(date);
+  const appoointments = await Appointment.find({
+    appointmentDate: {
+      $gte: new Date(selectedDate.setHours(0, 0, 0, 0)),
+      $lte: new Date(selectedDate.setHours(23, 59, 59, 999)),
+    },
+  });
+  console.log(appoointments);
+  const bookedSlots = appoointments.map((a) => a.timeSlot);
+  console.log(bookedSlots);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, bookedSlots, "Booked Slots fetched"));
+});
 // Get all appointments
 
-export { bookAppointment };
+export { bookAppointment, getBookedAppointments };
