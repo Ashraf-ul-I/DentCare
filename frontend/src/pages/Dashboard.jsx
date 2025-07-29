@@ -16,7 +16,7 @@ export default function Dashboard() {
   };
 
   const confirmLogout = () => {
-    localStorage.removeItem("authToken");
+    localStorage.removeItem("token");
     setShowLogoutConfirm(false);
     navigate("/login", { replace: true });
   };
