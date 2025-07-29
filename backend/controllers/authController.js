@@ -125,6 +125,23 @@ export const forgotPassword = async (req, res) => {
   res.json({ message: "OTP sent to email" });
 };
 
+export const logout = async (req, res) => {
+  try {
+    // Clear the refresh token cookie
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Lax",
+      path: "/login",
+    });
+
+    return res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ message: "Logout failed" });
+  }
+};
+
 export const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
   const user = await User.findOne({ email });
