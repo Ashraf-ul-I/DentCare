@@ -66,6 +66,14 @@ export default function Dashboard() {
             currentPath={location.pathname}
             navigate={navigate}
           />
+          <SidebarItem
+            icon="📚"
+            label="All appointments"
+            open={sidebarOpen}
+            to="/dashboard/show-appointment"
+            currentPath={location.pathname}
+            navigate={navigate}
+          />
         </nav>
 
         <div className="mb-4">

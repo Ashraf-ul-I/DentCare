@@ -17,6 +17,7 @@
     "@uiw/react-markdown-preview": "^5.1.5",
     "@uiw/react-md-editor": "^3.22.0",
     "axios": "^1.11.0",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.23.11",
     "lucide-react": "^0.525.0",
     "moment": "^2.30.1",

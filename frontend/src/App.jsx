@@ -29,6 +29,7 @@ import DoctorCard from "./Components/DoctorCard";
 import AdminCreateBlog from "./Components/AdminCreateBlog";
 import ShowAdminBlogs from "./Components/ShowAdminBlogs";
 import ProtectedRoute from "./utils/ProtectedRoute"; // import it
+import AppointmentDashboard from "./Components/AppointmentDashboard";
 
 function MainLayout() {
   return (
@@ -64,6 +65,7 @@ function App() {
             <Route path="create-blog" element={<AdminCreateBlog />} />
             <Route path="home-image" element={<DoctorCard />} />
             <Route path="show-blogs" element={<ShowAdminBlogs />} />
+            <Route path="show-appointment" element={<AppointmentDashboard />} />
           </Route>
         </Route>
       </Route>
