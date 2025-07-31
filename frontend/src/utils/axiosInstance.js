@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3000/api/v1",
+  baseURL: "http://localhost:8001/api/v1",
   withCredentials: true, // allow sending cookies (refreshToken)
 });
 
@@ -26,7 +26,7 @@ axiosInstance.interceptors.response.use(
 
       try {
         const res = await axios.get(
-          "http://localhost:3000/api/v1/auth/refresh",
+          "http://localhost:8001/api/v1/auth/refresh",
           {
             withCredentials: true,
           }
