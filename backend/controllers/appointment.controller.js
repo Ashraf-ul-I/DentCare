@@ -24,6 +24,28 @@ const bookAppointment = asyncHandler(async (req, res) => {
     );
   }
 
+  // Limiting dayily booking per phone/email
+  const maxAppointmentsPerDay = 2;
+  const today = new Date();
+  const dayStartTime = new Date(today.setHours(0, 0, 0, 0));
+  const dayEndTime = new Date(today.setHours(23, 59, 59, 999));
+
+  const todaysAppointmentCount = await Appointment.countDocuments({
+    $or: [
+      {email},
+      {phone}
+    ],
+    // The day when the appointment was booked
+    createdAt: {
+      $gte: dayStartTime,
+      $lte: dayEndTime
+    }
+  });
+
+  if(todaysAppointmentCount >= maxAppointmentsPerDay){
+    throw new ApiError(400, "You have reached your maximum appointment slot for today!")
+  }
+  
   const newAppointment = await Appointment.create({
     fullname,
     email,
