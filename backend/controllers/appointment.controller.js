@@ -5,7 +5,6 @@ import { ApiError } from "../utils/ApiError.js";
 import moment from "moment-timezone";
 const bookAppointment = asyncHandler(async (req, res) => {
   const { fullname, email, phone, appointmentDate, timeSlot } = req.body;
-  console.log(req.body);
 
   if (!fullname || !phone || !appointmentDate || !timeSlot) {
     throw new ApiError(400, "Please fill up all the information");
@@ -53,9 +52,8 @@ const getBookedAppointments = asyncHandler(async (req, res) => {
       $lte: new Date(selectedDate.setHours(23, 59, 59, 999)),
     },
   });
-  console.log(appoointments);
   const bookedSlots = appoointments.map((a) => a.timeSlot);
-  console.log(bookedSlots);
+
   return res
     .status(200)
     .json(new ApiResponse(200, bookedSlots, "Booked Slots fetched"));
@@ -158,7 +156,6 @@ export const deleteAppointment = async (req, res) => {
 
     res.status(200).json({ message: "Appointment deleted" });
   } catch (error) {
-    console.error("Delete appointment error:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
