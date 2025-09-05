@@ -7,15 +7,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Node modules
+node_modules/
+
+# Build folders
+dist/
+dist-ssr/
+
+# Local files
 *.local
+.env
+
+# Config files (Firebase service account, API keys)
+config/
+firebaseConfig.js
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*

@@ -1,8 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
-import { forgotPassword } from "../api/authApi";
+// import { useMutation } from "@tanstack/react-query";
+// import { forgotPassword } from "../api/authApi";
 
-export const useForgotPassMutation = () => {
-  return useMutation({
-    mutationFn: forgotPassword,
-  });
-};
+// export const useForgotPassMutation = () => {
+//   return useMutation({
+//     mutationFn: forgotPassword,
+//   });
+// };
