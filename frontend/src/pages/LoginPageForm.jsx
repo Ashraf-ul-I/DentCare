@@ -22,7 +22,7 @@ export default function LoginPageForm() {
       const user = result.user;
 
       // Get Firebase ID token
-      const token = await user.getIdToken();
+      const token = await user.getIdToken(true);
 
       // 3️⃣ Send token to backend for verification/login
       loginMutation.mutate(
