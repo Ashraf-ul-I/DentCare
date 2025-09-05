@@ -1,1 +1,35 @@
 @import "tailwindcss";
+
+.perspective {
+  perspective: 1000px;
+}
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+.backface-hidden {
+  backface-visibility: hidden;
+}
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+@keyframes borderGlow {
+  0% {
+    border-color: #ff0000;
+  }
+  25% {
+    border-color: #ff9900;
+  }
+  50% {
+    border-color: #33cc33;
+  }
+  75% {
+    border-color: #0066ff;
+  }
+  100% {
+    border-color: #ff0000;
+  }
+}
+
+.animate-borderGlow {
+  animation: borderGlow 3s linear infinite;
+}

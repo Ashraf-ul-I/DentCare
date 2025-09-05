@@ -16,7 +16,10 @@ export default function Dashboard() {
   };
 
   const confirmLogout = () => {
+    // Remove token and shared key
     localStorage.removeItem("token");
+    localStorage.removeItem("isLoggedIn");
+
     setShowLogoutConfirm(false);
     navigate("/login", { replace: true });
   };
@@ -66,6 +69,25 @@ export default function Dashboard() {
             currentPath={location.pathname}
             navigate={navigate}
           />
+
+          <SidebarItem
+            icon="📚FGDC"
+            label="DoctorProfile"
+            open={sidebarOpen}
+            to="/dashboard/doctorsProfile"
+            currentPath={location.pathname}
+            navigate={navigate}
+          />
+
+          <SidebarItem
+            icon="📚DCsr"
+            label="DentalCenterImages"
+            open={sidebarOpen}
+            to="/dashboard/hospital-pic-add"
+            currentPath={location.pathname}
+            navigate={navigate}
+          />
+
           <SidebarItem
             icon="📚"
             label="All appointments"
@@ -104,7 +126,12 @@ export default function Dashboard() {
 
         <ConfirmModal
           isOpen={showLogoutConfirm}
-          title="Are you sure you want to logout?"
+          title={
+            <>
+              Are you sure you want to{" "}
+              <span className="text-red-600 font-semibold">Logout</span>?
+            </>
+          }
           onConfirm={confirmLogout}
           onCancel={cancelLogout}
         />

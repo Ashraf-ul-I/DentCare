@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import HamburgerIcon from "../icons/HamburgerIcon";
 import CloseIcon from "../icons/CloseIcon";
-
+import { HashLink } from "react-router-hash-link";
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false); // State to manage mobile menu visibility
   const toggleMenu = () => {
@@ -19,23 +19,31 @@ export const Navbar = () => {
           {/* Desktop Navigation Links */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link
-                to="/"
+              <HashLink
+                smooth
+                to="/#home"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
               >
                 Home
-              </Link>
-              <a
-                href="#appointment"
+              </HashLink>
+              <HashLink
+                smooth
+                to="/#appointment"
                 className="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-colors shadow-lg "
               >
                 Book Appointment
-              </a>
+              </HashLink>
               <Link
                 to="/blogs"
                 className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
               >
                 Blogs
+              </Link>
+              <Link
+                to="/about-us"
+                className="text-gray-900 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
+              >
+                About Us
               </Link>
               <Link
                 to="/contact"
@@ -91,6 +99,13 @@ export const Navbar = () => {
               onClick={toggleMenu} // Close menu on click
             >
               Blogs
+            </Link>
+            <Link
+              to="/about-us"
+              className="text-gray-900 hover:bg-blue-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors"
+              onClick={toggleMenu} // Close menu on click
+            >
+              About Us
             </Link>
             <Link
               to="/contact"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../utils/axiosInstance";
 import { format } from "date-fns";
+import AppointmentSkeleton from "./AppointmentSkeleton";
 
 const AppointmentDashboard = () => {
   const getTodayDateString = () => new Date().toISOString().split("T")[0];
@@ -12,6 +13,7 @@ const AppointmentDashboard = () => {
   const [limit] = useState(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [loadingItems, setLoadingItems] = useState([]);
 
   const [editingId, setEditingId] = useState(null);
   const [newTime, setNewTime] = useState("");
@@ -72,6 +74,8 @@ const AppointmentDashboard = () => {
 
   const handleSaveEdit = async (id) => {
     if (timeError) return;
+    setLoadingItems((prev) => [...prev, id]);
+
     try {
       await axiosInstance.patch(`/booking/appointment/edit/${id}`, {
         timeSlot: newTime,
@@ -81,6 +85,8 @@ const AppointmentDashboard = () => {
       await fetchAppointments();
     } catch {
       setError("Failed to update appointment");
+    } finally {
+      setLoadingItems((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -91,13 +97,16 @@ const AppointmentDashboard = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this appointment?"))
-      return;
+    if (!window.confirm("Are you sure?")) return;
+    setLoadingItems((prev) => [...prev, id]);
+
     try {
       await axiosInstance.delete(`/booking/appointment/delete/${id}`);
-      fetchAppointments();
+      await fetchAppointments();
     } catch {
-      setError("Failed to delete appointment");
+      setError("Failed to delete");
+    } finally {
+      setLoadingItems((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
@@ -123,7 +132,9 @@ const AppointmentDashboard = () => {
       </div>
 
       {loading ? (
-        <p className="text-blue-500 text-center">Loading appointments...</p>
+        <p className="text-blue-500 text-center">
+          <AppointmentSkeleton />
+        </p>
       ) : error ? (
         <p className="text-red-500 text-center">{error}</p>
       ) : appointments.length === 0 ? (

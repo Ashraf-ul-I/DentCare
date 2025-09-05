@@ -3,7 +3,10 @@ import AppointmentForm from "../Components/AppointmentForm";
 import DoctorCard from "../Components/DoctorCard";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, Star, ArrowRight } from "lucide-react";
-
+import DoctorSlider from "../Components/DoctorSlider";
+import HospitalSlider from "../Components/HospitalImageSlider";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDoctors } from "../api/doctorService";
 export default function HomePage() {
   // State for doctor slider
   const [currentDoctorIndex, setCurrentDoctorIndex] = useState(0);
@@ -14,6 +17,10 @@ export default function HomePage() {
   const [bookedSlots, setBookedSlots] = useState(
     new Set(["10:00 AM", "2:00 PM"])
   );
+  const { data: doctorss = [], isLoading } = useQuery({
+    queryKey: ["doctors"],
+    queryFn: fetchDoctors,
+  });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -133,26 +140,65 @@ export default function HomePage() {
     <>
       <section
         id="home"
-        className="bg-gradient-to-r from-blue-50 to-white py-20"
+        className="bg-gradient-to-r from-blue-50 to-white py-1"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row items-center">
-            <div className="lg:w-1/2 lg:pr-12">
-              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <div className="lg:w-1/2 lg:pr-12 flex flex-col justify-center items-start">
+              {/* Heading */}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 leading-tight">
                 Your Smile is Our{" "}
                 <span className="text-blue-600">Priority</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8">
+
+              {/* Description */}
+              <p className="text-lg sm:text-xl text-gray-700 mb-6 max-w-xl">
                 Experience exceptional dental care with our team of expert
-                professionals. We're committed to providing the highest quality
-                treatment in a comfortable, modern environment.
+                professionals. You can either call us to book an appointment or
+                schedule it online using the button below.
               </p>
-              <button className="bg-blue-600 text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg flex items-center">
+
+              {/* Appointment Button */}
+              <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transition-colors flex items-center justify-center w-fit">
                 Book Your Appointment
                 <ArrowRight className="ml-2 h-5 w-5" />
               </button>
+
+              {/* Or Divider */}
+              <div className="flex items-center my-6 w-full max-w-sm">
+                <div className="flex-grow border-t border-gray-300"></div>
+                <span className="mx-3 text-gray-500 font-medium">OR</span>
+                <div className="flex-grow border-t border-gray-300"></div>
+              </div>
+
+              {/* Call Info */}
+              {doctorss.length > 0 &&
+                (() => {
+                  // Find a random doctor with a serial number
+                  const validDoctors = doctorss.filter(
+                    (doc) => doc.serialNumbers && doc.serialNumbers !== ""
+                  );
+                  if (validDoctors.length === 0) return null;
+
+                  const randomDoctor =
+                    validDoctors[
+                      Math.floor(Math.random() * validDoctors.length)
+                    ];
+
+                  return (
+                    <div className="p-4 bg-blue-50  rounded-lg shadow-md flex items-center max-w-sm">
+                      <span className="text-gray-700 mr-3 text-lg">
+                        📞 Call us at:
+                      </span>
+                      <span className="font-semibold text-blue-600 text-lg">
+                        {randomDoctor.serialNumbers}
+                      </span>
+                    </div>
+                  );
+                })()}
             </div>
-            <div className="lg:w-1/2 mt-12 lg:mt-0">
+
+            {/* <div className="lg:w-1/2 mt-12 lg:mt-0">
               <div className="relative bg-white rounded-2xl shadow-2xl p-8">
                 <div className="flex items-center justify-between mb-4">
                   <button
@@ -190,11 +236,13 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
+            <HospitalSlider />
           </div>
         </div>
       </section>
-      <DoctorCard doctors={doctors} />
+      {/* <DoctorCard doctors={doctors} /> */}
+      <DoctorSlider />
 
       <AppointmentForm
         formData={formData}
